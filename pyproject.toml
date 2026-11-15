@@ -1,0 +1,9 @@
+[project]
+name = "alien-invasion"
+version = "0.1.0"
+description = "Alien Invasion from Python Crash Course, 3rd edition"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pygame>=2.6",
+]
