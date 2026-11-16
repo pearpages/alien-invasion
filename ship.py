@@ -7,21 +7,19 @@ from rules import ship_step
 class Ship(Sprite):
     """A class to manage the ship."""
 
-    def __init__(self, ai_game):
-        """Initialize the ship and set its starting position."""
-        super().__init__()
-        self.screen = ai_game.screen
-        self.screen_rect = ai_game.screen.get_rect()
+    def __init__(self, image: pygame.Surface, bounds: pygame.Rect):
+        """Place the ship at the bottom center of bounds.
 
-        # Load the ship image and get its rect.
-        self.image = pygame.image.load("images/ship.bmp")
+        image is the ship's picture; bounds is the area it may move in,
+        normally the whole screen.
+        """
+        super().__init__()
+        self.image = image
         self.rect = self.image.get_rect()
+        self.bounds = bounds
 
         # Start each new ship at the bottom center of the screen.
-        self.rect.midbottom = self.screen_rect.midbottom
-
-        # Store a float for the ship's exact horizontal position.
-        self.x = float(self.rect.x)
+        self.center_ship()
 
         # Movement flags; start with a ship that's not moving.
         self.moving_right = False
@@ -33,7 +31,7 @@ class Ship(Sprite):
         self.x += ship_step(
             left=self.rect.left,
             right=self.rect.right,
-            screen_width=self.screen_rect.width,
+            screen_width=self.bounds.width,
             speed=speed,
             moving_left=self.moving_left,
             moving_right=self.moving_right,
@@ -42,11 +40,12 @@ class Ship(Sprite):
         # Update rect object from self.x.
         self.rect.x = self.x
 
-    def blitme(self):
+    def draw(self, screen: pygame.Surface):
         """Draw the ship at its current location."""
-        self.screen.blit(self.image, self.rect)
+        screen.blit(self.image, self.rect)
 
     def center_ship(self):
-        """Center the ship on the screen."""
-        self.rect.midbottom = self.screen_rect.midbottom
+        """Center the ship at the bottom of its bounds."""
+        self.rect.midbottom = self.bounds.midbottom
+        # Store a float for the ship's exact horizontal position.
         self.x = float(self.rect.x)

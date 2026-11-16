@@ -15,8 +15,6 @@ uv sync
 
 ## Run
 
-Run from this folder, because the game loads `images/` with relative paths:
-
 ```bash
 uv run alien_invasion.py
 ```
@@ -35,11 +33,16 @@ uv run ruff format .       # format the code
 
 ruff and pytest are dev dependencies, configured in `pyproject.toml`.
 
+## Design
+
+Every class receives what it needs through its constructor instead of reaching into the whole game. `main()` in `alien_invasion.py` is the one place that creates the window, loads the images and connects everything. No class keeps the screen: anything that draws gets it as an argument, `draw(screen)`. So every piece, including the whole game on an off-screen surface, can be tested without a window.
+
 ## Files
 
 | File | Role |
 |---|---|
-| `alien_invasion.py` | Main game class and loop |
+| `alien_invasion.py` | `AlienInvasion`: game loop, input and collisions; `main()` builds and connects everything |
+| `assets.py` | `Assets`: loads each image once, from `images/` next to the code |
 | `rules.py` | The game's rules as plain functions with no pygame: fleet layout, edges, scoring, firing, ship movement |
 | `config.py` | `Config`: frozen dataclass of settings that never change |
 | `difficulty.py` | `Difficulty`: speeds and alien points for the current level; each level-up makes a new one |

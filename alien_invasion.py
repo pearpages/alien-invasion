@@ -4,6 +4,7 @@ from time import sleep
 import pygame
 
 from alien import Alien
+from assets import Assets
 from bullet import Bullet
 from button import Button
 from config import Config
@@ -17,27 +18,24 @@ from ship import Ship
 class AlienInvasion:
     """Overall class to manage game assets and behavior."""
 
-    def __init__(self):
-        """Initialize the game, and create game resources."""
-        pygame.init()
+    def __init__(self, config: Config, screen: pygame.Surface, assets: Assets):
+        """Set up a game that draws on screen, using config and assets."""
+        self.config = config
+        self.screen = screen
+        self.assets = assets
         self.clock = pygame.time.Clock()
-        self.config = Config()
-        self.difficulty = Difficulty.starting(self.config)
-
-        self.screen = pygame.display.set_mode(
-            (self.config.screen_width, self.config.screen_height)
-        )
-        pygame.display.set_caption("Alien Invasion")
+        self.difficulty = Difficulty.starting(config)
+        bounds = screen.get_rect()
 
         # Create an instance to store game statistics,
         #   and create a scoreboard.
-        self.stats = GameStats(ships_left=self.config.ship_limit)
-        self.sb = Scoreboard(self)
+        self.stats = GameStats(ships_left=config.ship_limit)
+        self.sb = Scoreboard(self.stats, config.bg_color, assets.ship, bounds)
 
         # 1 moves the fleet right; -1 moves it left.
         self.fleet_direction = 1
 
-        self.ship = Ship(self)
+        self.ship = Ship(assets.ship, bounds)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
 
@@ -47,7 +45,7 @@ class AlienInvasion:
         self.game_active = False
 
         # Make the Play button.
-        self.play_button = Button(self, "Play")
+        self.play_button = Button("Play", bounds.center)
 
     def run_game(self):
         """Start the main loop for the game."""
@@ -122,7 +120,11 @@ class AlienInvasion:
     def _fire_bullet(self):
         """Create a new bullet and add it to the bullets group."""
         if can_fire(len(self.bullets), self.config.bullets_allowed):
-            new_bullet = Bullet(self)
+            new_bullet = Bullet(
+                self.ship.rect.midtop,
+                (self.config.bullet_width, self.config.bullet_height),
+                self.config.bullet_color,
+            )
             self.bullets.add(new_bullet)
 
     def _update_bullets(self):
@@ -203,8 +205,8 @@ class AlienInvasion:
 
     def _create_fleet(self):
         """Create the fleet of aliens."""
-        # Make one alien just to measure it.
-        alien_width, alien_height = Alien(self).rect.size
+        alien_image = self.assets.alien
+        alien_width, alien_height = alien_image.get_size()
 
         for x, y in fleet_positions(
             self.config.screen_width,
@@ -212,19 +214,13 @@ class AlienInvasion:
             alien_width,
             alien_height,
         ):
-            self._create_alien(x, y)
-
-    def _create_alien(self, x_position, y_position):
-        """Create an alien and place it in the fleet."""
-        new_alien = Alien(self)
-        new_alien.x = x_position
-        new_alien.rect.x = x_position
-        new_alien.rect.y = y_position
-        self.aliens.add(new_alien)
+            # Every alien shares the one image loaded at start-up.
+            self.aliens.add(Alien(alien_image, x, y))
 
     def _check_fleet_edges(self):
         """Respond appropriately if any aliens have reached an edge."""
-        if any(alien.check_edges() for alien in self.aliens):
+        width = self.config.screen_width
+        if any(alien.check_edges(width) for alien in self.aliens):
             self._change_fleet_direction()
 
     def _change_fleet_direction(self):
@@ -237,21 +233,36 @@ class AlienInvasion:
         """Update images on the screen, and flip to the new screen."""
         self.screen.fill(self.config.bg_color)
         for bullet in self.bullets.sprites():
-            bullet.draw_bullet()
-        self.ship.blitme()
+            bullet.draw(self.screen)
+        self.ship.draw(self.screen)
         self.aliens.draw(self.screen)
 
         # Draw the score information.
-        self.sb.show_score()
+        self.sb.draw(self.screen)
 
         # Draw the play button if the game is inactive.
         if not self.game_active:
-            self.play_button.draw_button()
+            self.play_button.draw(self.screen)
 
         pygame.display.flip()
 
 
+def main():
+    """Build everything the game needs, connect it, and run the game.
+
+    This is the only place that creates the window and loads files; every
+    class receives what it needs from here.
+    """
+    pygame.init()
+    config = Config()
+    screen = pygame.display.set_mode(
+        (config.screen_width, config.screen_height)
+    )
+    pygame.display.set_caption("Alien Invasion")
+    assets = Assets.load()
+
+    AlienInvasion(config, screen, assets).run_game()
+
+
 if __name__ == "__main__":
-    # Make a game instance, and run the game.
-    ai = AlienInvasion()
-    ai.run_game()
+    main()
