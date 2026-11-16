@@ -7,3 +7,28 @@ requires-python = ">=3.12"
 dependencies = [
     "pygame>=2.6",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.5",
+]
+
+[tool.ruff]
+line-length = 79          # PEP 8's limit; the book's code already fits
+target-version = "py312"  # matches requires-python
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle: PEP 8 layout
+    "F",       # pyflakes: unused imports, undefined names
+    "I",       # isort: import groups and order
+    "N",       # pep8-naming: class and function names
+    "UP",      # pyupgrade: modern Python syntax
+    "B",       # flake8-bugbear: likely bugs
+    "SIM",     # flake8-simplify: simpler equivalents
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]        # lets tests import settings, ship, ... from the root

@@ -25,6 +25,16 @@ uv run alien_invasion.py
 
 Controls: click **Play**, use ← → to move, Space to fire, Q to quit.
 
+## Checks
+
+```bash
+uv run pytest              # tests in tests/
+uv run ruff check .        # lint: PEP 8, import order, likely bugs
+uv run ruff format .       # format the code
+```
+
+ruff and pytest are dev dependencies, configured in `pyproject.toml`.
+
 ## Files
 
 | File | Role |
