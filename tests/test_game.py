@@ -3,16 +3,16 @@
 import pygame
 import pytest
 
-from alien_invasion import AlienInvasion
 from assets import Assets
 from config import Config
+from game import Game
 
 
 @pytest.fixture
 def game():
     config = Config()
     screen = pygame.Surface((config.screen_width, config.screen_height))
-    return AlienInvasion(config, screen, Assets.load())
+    return Game(config, screen, Assets.load())
 
 
 def test_new_game_waits_for_play_with_a_full_fleet(game):

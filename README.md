@@ -16,7 +16,7 @@ uv sync
 ## Run
 
 ```bash
-uv run alien_invasion.py
+uv run main.py
 ```
 
 `uv run` uses `.venv` automatically, so there's no need to activate it.
@@ -35,13 +35,14 @@ ruff and pytest are dev dependencies, configured in `pyproject.toml`.
 
 ## Design
 
-Every class receives what it needs through its constructor instead of reaching into the whole game. `main()` in `alien_invasion.py` is the one place that creates the window, loads the images and connects everything. No class keeps the screen: anything that draws gets it as an argument, `draw(screen)`. So every piece, including the whole game on an off-screen surface, can be tested without a window.
+Every class receives what it needs through its constructor instead of reaching into the whole game. `main()` in `main.py` is the one place that creates the window, loads the images and connects everything. No class keeps the screen: anything that draws gets it as an argument, `draw(screen)`. So every piece, including the whole game on an off-screen surface, can be tested without a window.
 
 ## Files
 
 | File | Role |
 |---|---|
-| `alien_invasion.py` | `AlienInvasion`: game loop, input and collisions; `main()` builds and connects everything |
+| `main.py` | Entry point: `main()` starts pygame, opens the window, loads assets and connects everything |
+| `game.py` | `Game`: the main loop, input, collisions and levels |
 | `assets.py` | `Assets`: loads each image once, from `images/` next to the code |
 | `rules.py` | The game's rules as plain functions with no pygame: fleet layout, edges, scoring, firing, ship movement |
 | `config.py` | `Config`: frozen dataclass of settings that never change |

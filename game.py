@@ -15,8 +15,8 @@ from scoreboard import Scoreboard
 from ship import Ship
 
 
-class AlienInvasion:
-    """Overall class to manage game assets and behavior."""
+class Game:
+    """The game itself: the main loop, input, collisions and levels."""
 
     def __init__(self, config: Config, screen: pygame.Surface, assets: Assets):
         """Set up a game that draws on screen, using config and assets."""
@@ -41,13 +41,13 @@ class AlienInvasion:
 
         self._create_fleet()
 
-        # Start Alien Invasion in an inactive state.
+        # Start the game in an inactive state.
         self.game_active = False
 
         # Make the Play button.
         self.play_button = Button("Play", bounds.center)
 
-    def run_game(self):
+    def run(self):
         """Start the main loop for the game."""
         while True:
             self._check_events()
@@ -245,24 +245,3 @@ class AlienInvasion:
             self.play_button.draw(self.screen)
 
         pygame.display.flip()
-
-
-def main():
-    """Build everything the game needs, connect it, and run the game.
-
-    This is the only place that creates the window and loads files; every
-    class receives what it needs from here.
-    """
-    pygame.init()
-    config = Config()
-    screen = pygame.display.set_mode(
-        (config.screen_width, config.screen_height)
-    )
-    pygame.display.set_caption("Alien Invasion")
-    assets = Assets.load()
-
-    AlienInvasion(config, screen, assets).run_game()
-
-
-if __name__ == "__main__":
-    main()
