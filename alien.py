@@ -1,6 +1,8 @@
 import pygame
 from pygame.sprite import Sprite
 
+from rules import at_screen_edge
+
 
 class Alien(Sprite):
     """A class to represent a single alien in the fleet."""
@@ -23,8 +25,8 @@ class Alien(Sprite):
 
     def check_edges(self):
         """Return True if alien is at edge of screen."""
-        screen_rect = self.screen.get_rect()
-        return (self.rect.right >= screen_rect.right) or (self.rect.left <= 0)
+        screen_width = self.screen.get_rect().width
+        return at_screen_edge(self.rect.left, self.rect.right, screen_width)
 
     def update(self, dx: float):
         """Move the alien dx pixels; negative dx moves it left."""

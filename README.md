@@ -40,6 +40,7 @@ ruff and pytest are dev dependencies, configured in `pyproject.toml`.
 | File | Role |
 |---|---|
 | `alien_invasion.py` | Main game class and loop |
+| `rules.py` | The game's rules as plain functions with no pygame: fleet layout, edges, scoring, firing, ship movement |
 | `config.py` | `Config`: frozen dataclass of settings that never change |
 | `difficulty.py` | `Difficulty`: speeds and alien points for the current level; each level-up makes a new one |
 | `ship.py`, `alien.py`, `bullet.py` | The sprites |

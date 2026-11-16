@@ -9,6 +9,7 @@ from button import Button
 from config import Config
 from difficulty import Difficulty
 from game_stats import GameStats
+from rules import can_fire, fleet_positions, points_for_hits, reached_bottom
 from scoreboard import Scoreboard
 from ship import Ship
 
@@ -120,7 +121,7 @@ class AlienInvasion:
 
     def _fire_bullet(self):
         """Create a new bullet and add it to the bullets group."""
-        if len(self.bullets) < self.config.bullets_allowed:
+        if can_fire(len(self.bullets), self.config.bullets_allowed):
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
@@ -144,8 +145,9 @@ class AlienInvasion:
         )
 
         if collisions:
-            for aliens in collisions.values():
-                self.stats.score += self.difficulty.alien_points * len(aliens)
+            self.stats.score += points_for_hits(
+                map(len, collisions.values()), self.difficulty.alien_points
+            )
             self.sb.prep_score()
             self.sb.check_high_score()
 
@@ -194,28 +196,23 @@ class AlienInvasion:
 
     def _check_aliens_bottom(self):
         """Check if any aliens have reached the bottom of the screen."""
-        for alien in self.aliens.sprites():
-            if alien.rect.bottom >= self.config.screen_height:
-                # Treat this the same as if the ship got hit.
-                self._ship_hit()
-                break
+        bottoms = (alien.rect.bottom for alien in self.aliens)
+        if reached_bottom(bottoms, self.config.screen_height):
+            # Treat this the same as if the ship got hit.
+            self._ship_hit()
 
     def _create_fleet(self):
         """Create the fleet of aliens."""
-        # Create an alien and keep adding aliens until there's no room left.
-        # Spacing between aliens is one alien width and one alien height.
-        alien = Alien(self)
-        alien_width, alien_height = alien.rect.size
+        # Make one alien just to measure it.
+        alien_width, alien_height = Alien(self).rect.size
 
-        current_x, current_y = alien_width, alien_height
-        while current_y < (self.config.screen_height - 3 * alien_height):
-            while current_x < (self.config.screen_width - 2 * alien_width):
-                self._create_alien(current_x, current_y)
-                current_x += 2 * alien_width
-
-            # Finished a row; reset x value, and increment y value.
-            current_x = alien_width
-            current_y += 2 * alien_height
+        for x, y in fleet_positions(
+            self.config.screen_width,
+            self.config.screen_height,
+            alien_width,
+            alien_height,
+        ):
+            self._create_alien(x, y)
 
     def _create_alien(self, x_position, y_position):
         """Create an alien and place it in the fleet."""
@@ -227,10 +224,8 @@ class AlienInvasion:
 
     def _check_fleet_edges(self):
         """Respond appropriately if any aliens have reached an edge."""
-        for alien in self.aliens.sprites():
-            if alien.check_edges():
-                self._change_fleet_direction()
-                break
+        if any(alien.check_edges() for alien in self.aliens):
+            self._change_fleet_direction()
 
     def _change_fleet_direction(self):
         """Drop the entire fleet and change the fleet's direction."""

@@ -1,6 +1,7 @@
 import pygame.font
 from pygame.sprite import Group
 
+from rules import format_score
 from ship import Ship
 
 
@@ -31,8 +32,7 @@ class Scoreboard:
 
     def prep_score(self):
         """Turn the score into a rendered image."""
-        rounded_score = round(self.stats.score, -1)
-        score_str = f"{rounded_score:,}"
+        score_str = format_score(self.stats.score)
         self.score_image = self.font.render(
             score_str, True, self.text_color, self.config.bg_color
         )
@@ -44,8 +44,7 @@ class Scoreboard:
 
     def prep_high_score(self):
         """Turn the high score into a rendered image."""
-        high_score = round(self.stats.high_score, -1)
-        high_score_str = f"{high_score:,}"
+        high_score_str = format_score(self.stats.high_score)
         self.high_score_image = self.font.render(
             high_score_str, True, self.text_color, self.config.bg_color
         )

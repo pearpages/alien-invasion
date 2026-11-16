@@ -1,6 +1,8 @@
 import pygame
 from pygame.sprite import Sprite
 
+from rules import ship_step
+
 
 class Ship(Sprite):
     """A class to manage the ship."""
@@ -28,10 +30,14 @@ class Ship(Sprite):
     def update(self, speed: float):
         """Move the ship speed pixels, following the movement flags."""
         # Update the ship's x value, not the rect.
-        if self.moving_right and self.rect.right < self.screen_rect.right:
-            self.x += speed
-        if self.moving_left and self.rect.left > 0:
-            self.x -= speed
+        self.x += ship_step(
+            left=self.rect.left,
+            right=self.rect.right,
+            screen_width=self.screen_rect.width,
+            speed=speed,
+            moving_left=self.moving_left,
+            moving_right=self.moving_right,
+        )
 
         # Update rect object from self.x.
         self.rect.x = self.x
