@@ -70,6 +70,11 @@ def ship_step(
     return step
 
 
+def reserve_ships(ships_left: int) -> int:
+    """Return how many ships wait in reserve, not counting the one in play."""
+    return max(ships_left - 1, 0)
+
+
 def format_score(score: int) -> str:
     """Round a score to the nearest ten and add thousands separators."""
     return f"{round(score, -1):,}"

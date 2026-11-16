@@ -4,7 +4,7 @@ from pygame.sprite import Group
 
 from config import Color
 from game_stats import GameStats
-from rules import format_score
+from rules import format_score, reserve_ships
 from ship import Ship
 
 
@@ -78,9 +78,9 @@ class Scoreboard:
         self.level_rect.top = self.score_rect.bottom + 10
 
     def prep_ships(self):
-        """Show how many ships are left."""
+        """Show the ships waiting in reserve; the one in play is not shown."""
         self.ships = Group()
-        for ship_number in range(self.stats.ships_left):
+        for ship_number in range(reserve_ships(self.stats.ships_left)):
             ship = Ship(self.ship_image, self.bounds)
             ship.rect.x = 10 + ship_number * ship.rect.width
             ship.rect.y = 10

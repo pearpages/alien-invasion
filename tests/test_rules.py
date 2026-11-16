@@ -7,6 +7,7 @@ from rules import (
     format_score,
     points_for_hits,
     reached_bottom,
+    reserve_ships,
     ship_step,
 )
 
@@ -151,3 +152,13 @@ def test_ship_stops_at_the_left_side():
 )
 def test_format_score(score, shown):
     assert format_score(score) == shown
+
+
+# --- reserve_ships -----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("ships_left", "reserve"), [(3, 2), (2, 1), (1, 0), (0, 0)]
+)
+def test_reserve_ships_leave_out_the_one_in_play(ships_left, reserve):
+    assert reserve_ships(ships_left) == reserve

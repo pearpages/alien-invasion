@@ -147,6 +147,53 @@ def test_clearing_the_fleet_goes_up_a_level(game):
     assert game.difficulty.alien_points == 75
 
 
+# --- losing ships ------------------------------------------------------------
+
+
+@pytest.fixture
+def no_pause(monkeypatch):
+    """Skip the real half-second pause after a hit, to keep tests fast."""
+    monkeypatch.setattr("game.sleep", lambda seconds: None)
+
+
+def crash_an_alien_into_the_ship(game):
+    """Put an alien on top of the ship, then play one frame."""
+    alien = game.aliens.sprites()[0]
+    alien.rect.center = game.ship.rect.center
+    alien.x = float(alien.rect.x)
+    game.step()
+
+
+def test_a_crash_costs_one_ship_and_brings_a_new_fleet(game, no_pause):
+    game.start()
+
+    crash_an_alien_into_the_ship(game)
+
+    assert game.stats.ships_left == 2
+    assert len(game.aliens) == 72
+    assert game.game_active
+
+
+def test_the_game_ends_after_three_crashes(game, no_pause):
+    game.start()
+
+    for _ in range(3):
+        crash_an_alien_into_the_ship(game)
+
+    assert not game.game_active
+
+
+def test_no_reserve_icons_while_flying_the_last_ship(game, no_pause):
+    game.start()
+
+    for _ in range(2):
+        crash_an_alien_into_the_ship(game)
+
+    assert game.game_active
+    assert game.stats.ships_left == 1
+    assert len(game.sb.ships) == 0
+
+
 # --- quitting ----------------------------------------------------------------
 
 

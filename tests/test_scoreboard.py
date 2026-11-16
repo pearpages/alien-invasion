@@ -6,11 +6,18 @@ def make_scoreboard(stats, ship_image, bounds):
     return Scoreboard(stats, (230, 230, 230), ship_image, bounds)
 
 
-def test_one_ship_icon_per_ship_left(ship_image, bounds):
+def test_icons_show_reserve_ships_not_the_one_in_play(ship_image, bounds):
     stats = GameStats(ships_left=3)
     scoreboard = make_scoreboard(stats, ship_image, bounds)
 
-    stats.ships_left = 1
+    assert len(scoreboard.ships) == 2
+
+
+def test_icons_follow_ships_lost(ship_image, bounds):
+    stats = GameStats(ships_left=3)
+    scoreboard = make_scoreboard(stats, ship_image, bounds)
+
+    stats.ships_left = 2
     scoreboard.prep_ships()
 
     assert len(scoreboard.ships) == 1

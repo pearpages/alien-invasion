@@ -197,11 +197,11 @@ class Game:
 
     def _ship_hit(self):
         """Respond to the ship being hit by an alien."""
-        if self.stats.ships_left > 0:
-            # Decrement ships_left, and update scoreboard.
-            self.stats.ships_left -= 1
-            self.sb.prep_ships()
+        # Lose the ship that was hit, then see if any are left.
+        self.stats.ships_left -= 1
+        self.sb.prep_ships()
 
+        if self.stats.ships_left > 0:
             # Get rid of any remaining bullets and aliens.
             self.bullets.empty()
             self.aliens.empty()
