@@ -37,12 +37,14 @@ ruff and pytest are dev dependencies, configured in `pyproject.toml`.
 
 Every class receives what it needs through its constructor instead of reaching into the whole game. `main()` in `main.py` is the one place that creates the window, loads the images and connects everything. No class keeps the screen: anything that draws gets it as an argument, `draw(screen)`. So every piece, including the whole game on an off-screen surface, can be tested without a window.
 
+Each frame of the game loop does three separate jobs: `handle(event)` turns input into what the player wants, `step()` moves the world forward one frame, and `draw(screen)` paints it. Only `Game.run()` touches the real window, clock and mouse cursor, so tests drive the whole game with made-up events.
+
 ## Files
 
 | File | Role |
 |---|---|
 | `main.py` | Entry point: `main()` starts pygame, opens the window, loads assets and connects everything |
-| `game.py` | `Game`: the main loop, input, collisions and levels |
+| `game.py` | `Game`: `handle(event)` for input, `step()` for one frame of logic, `draw(screen)` for output, and `run(screen)`, the loop that connects them to the real window |
 | `assets.py` | `Assets`: loads each image once, from `images/` next to the code |
 | `rules.py` | The game's rules as plain functions with no pygame: fleet layout, edges, scoring, firing, ship movement |
 | `config.py` | `Config`: frozen dataclass of settings that never change |

@@ -21,7 +21,8 @@ def main():
     pygame.display.set_caption("Alien Invasion")
     assets = Assets.load()
 
-    Game(config, screen, assets).run()
+    Game(config, assets).run(screen)
+    pygame.quit()
 
 
 if __name__ == "__main__":

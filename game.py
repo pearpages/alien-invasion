@@ -1,4 +1,3 @@
-import sys
 from time import sleep
 
 import pygame
@@ -16,16 +15,24 @@ from ship import Ship
 
 
 class Game:
-    """The game itself: the main loop, input, collisions and levels."""
+    """The game itself: input, one frame of logic, and drawing.
 
-    def __init__(self, config: Config, screen: pygame.Surface, assets: Assets):
-        """Set up a game that draws on screen, using config and assets."""
+    Each frame of the loop in run() does three separate jobs:
+
+    - handle(event): turn one input event into what the player wants.
+    - step(): move the world forward one frame.
+    - draw(screen): paint the world on any surface.
+
+    Only run() touches the real window, clock and mouse cursor, so tests
+    can drive a game with made-up events and no window.
+    """
+
+    def __init__(self, config: Config, assets: Assets):
+        """Set up a game waiting for the player to click Play."""
         self.config = config
-        self.screen = screen
         self.assets = assets
-        self.clock = pygame.time.Clock()
         self.difficulty = Difficulty.starting(config)
-        bounds = screen.get_rect()
+        bounds = pygame.Rect(0, 0, config.screen_width, config.screen_height)
 
         # Create an instance to store game statistics,
         #   and create a scoreboard.
@@ -43,74 +50,99 @@ class Game:
 
         # Start the game in an inactive state.
         self.game_active = False
+        # The loop in run() keeps going until the player quits.
+        self.running = True
 
         # Make the Play button.
         self.play_button = Button("Play", bounds.center)
 
-    def run(self):
-        """Start the main loop for the game."""
-        while True:
-            self._check_events()
+    def run(self, screen: pygame.Surface):
+        """Run the game in a real window until the player quits."""
+        clock = pygame.time.Clock()
+        while self.running:
+            for event in pygame.event.get():
+                self.handle(event)
+            self.step()
+            self.draw(screen)
 
-            if self.game_active:
-                self.ship.update(self.difficulty.ship_speed)
-                self._update_bullets()
-                self._update_aliens()
+            # Show the mouse cursor only while waiting for Play.
+            pygame.mouse.set_visible(not self.game_active)
+            pygame.display.flip()
+            clock.tick(60)
 
-            self._update_screen()
-            self.clock.tick(60)
+    def handle(self, event: pygame.event.Event):
+        """Respond to one keyboard, mouse or window event."""
+        if event.type == pygame.QUIT:
+            self.running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            self._check_play_button(event.pos)
+        elif event.type == pygame.KEYDOWN:
+            self._check_keydown_events(event)
+        elif event.type == pygame.KEYUP:
+            self._check_keyup_events(event)
 
-    def _check_events(self):
-        """Respond to keypresses and mouse events."""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                self._check_play_button(mouse_pos)
-            elif event.type == pygame.KEYDOWN:
-                self._check_keydown_events(event)
-            elif event.type == pygame.KEYUP:
-                self._check_keyup_events(event)
+    def start(self):
+        """Start a new game from level 1, keeping the high score."""
+        # Back to level 1 speeds, with the fleet moving right.
+        self.difficulty = Difficulty.starting(self.config)
+        self.fleet_direction = 1
 
-    def _check_play_button(self, mouse_pos):
+        # Reset the game statistics.
+        self.stats.reset(self.config.ship_limit)
+        self.sb.prep_score()
+        self.sb.prep_level()
+        self.sb.prep_ships()
+        self.game_active = True
+
+        # Get rid of any remaining bullets and aliens.
+        self.bullets.empty()
+        self.aliens.empty()
+
+        # Create a new fleet and center the ship.
+        self._create_fleet()
+        self.ship.center_ship()
+
+    def step(self):
+        """Move the world forward one frame; nothing happens until Play."""
+        if not self.game_active:
+            return
+        self.ship.update(self.difficulty.ship_speed)
+        self._update_bullets()
+        self._update_aliens()
+
+    def draw(self, screen: pygame.Surface):
+        """Paint the current state of the game on screen."""
+        screen.fill(self.config.bg_color)
+        for bullet in self.bullets.sprites():
+            bullet.draw(screen)
+        self.ship.draw(screen)
+        self.aliens.draw(screen)
+
+        # Draw the score information.
+        self.sb.draw(screen)
+
+        # Draw the play button if the game is inactive.
+        if not self.game_active:
+            self.play_button.draw(screen)
+
+    def _check_play_button(self, mouse_pos: tuple[int, int]):
         """Start a new game when the player clicks Play."""
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         if button_clicked and not self.game_active:
-            # Back to level 1 speeds, with the fleet moving right.
-            self.difficulty = Difficulty.starting(self.config)
-            self.fleet_direction = 1
+            self.start()
 
-            # Reset the game statistics.
-            self.stats.reset(self.config.ship_limit)
-            self.sb.prep_score()
-            self.sb.prep_level()
-            self.sb.prep_ships()
-            self.game_active = True
-
-            # Get rid of any remaining bullets and aliens.
-            self.bullets.empty()
-            self.aliens.empty()
-
-            # Create a new fleet and center the ship.
-            self._create_fleet()
-            self.ship.center_ship()
-
-            # Hide the mouse cursor.
-            pygame.mouse.set_visible(False)
-
-    def _check_keydown_events(self, event):
+    def _check_keydown_events(self, event: pygame.event.Event):
         """Respond to keypresses."""
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = True
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
-            sys.exit()
+            self.running = False
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
 
-    def _check_keyup_events(self, event):
+    def _check_keyup_events(self, event: pygame.event.Event):
         """Respond to key releases."""
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = False
@@ -182,7 +214,6 @@ class Game:
             sleep(0.5)
         else:
             self.game_active = False
-            pygame.mouse.set_visible(True)
 
     def _update_aliens(self):
         """Check if the fleet is at an edge, then update positions."""
@@ -228,20 +259,3 @@ class Game:
         for alien in self.aliens.sprites():
             alien.rect.y += self.config.fleet_drop_speed
         self.fleet_direction *= -1
-
-    def _update_screen(self):
-        """Update images on the screen, and flip to the new screen."""
-        self.screen.fill(self.config.bg_color)
-        for bullet in self.bullets.sprites():
-            bullet.draw(self.screen)
-        self.ship.draw(self.screen)
-        self.aliens.draw(self.screen)
-
-        # Draw the score information.
-        self.sb.draw(self.screen)
-
-        # Draw the play button if the game is inactive.
-        if not self.game_active:
-            self.play_button.draw(self.screen)
-
-        pygame.display.flip()
