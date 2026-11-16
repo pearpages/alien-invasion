@@ -1,5 +1,3 @@
-from time import sleep
-
 import pygame
 
 from alien import Alien
@@ -52,6 +50,8 @@ class Game:
         self.game_active = False
         # The loop in run() keeps going until the player quits.
         self.running = True
+        # Frames left to hold still after a crash; 0 means play on.
+        self.pause_frames = 0
 
         # Make the Play button.
         self.play_button = Button("Play", bounds.center)
@@ -86,6 +86,7 @@ class Game:
         # Back to level 1 speeds, with the fleet moving right.
         self.difficulty = Difficulty.starting(self.config)
         self.fleet_direction = 1
+        self.pause_frames = 0
 
         # Reset the game statistics.
         self.stats.reset(self.config.ship_limit)
@@ -105,6 +106,11 @@ class Game:
     def step(self):
         """Move the world forward one frame; nothing happens until Play."""
         if not self.game_active:
+            return
+        if self.pause_frames > 0:
+            # Hold still after a crash; the loop keeps drawing and
+            # reading input, so the window never freezes.
+            self.pause_frames -= 1
             return
         self.ship.update(self.difficulty.ship_speed)
         self._update_bullets()
@@ -210,8 +216,8 @@ class Game:
             self._create_fleet()
             self.ship.center_ship()
 
-            # Pause.
-            sleep(0.5)
+            # Pause for a moment before the new fleet starts moving.
+            self.pause_frames = self.config.hit_pause_frames
         else:
             self.game_active = False
 

@@ -15,6 +15,8 @@ class Config:
     # Ship
     ship_limit: int = 3
     ship_speed: float = 1.5
+    # Frames the game holds still after a crash: half a second at 60 fps
+    hit_pause_frames: int = 30
 
     # Bullets
     bullet_width: int = 3

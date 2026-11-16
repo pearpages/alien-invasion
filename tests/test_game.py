@@ -4,6 +4,8 @@ Events are made up with pygame.event.Event, so no keyboard, mouse or
 window is needed.
 """
 
+import time
+
 import pygame
 import pytest
 
@@ -150,21 +152,17 @@ def test_clearing_the_fleet_goes_up_a_level(game):
 # --- losing ships ------------------------------------------------------------
 
 
-@pytest.fixture
-def no_pause(monkeypatch):
-    """Skip the real half-second pause after a hit, to keep tests fast."""
-    monkeypatch.setattr("game.sleep", lambda seconds: None)
-
-
 def crash_an_alien_into_the_ship(game):
-    """Put an alien on top of the ship, then play one frame."""
+    """Wait out any pause, put an alien on the ship, then play one frame."""
+    while game.pause_frames:
+        game.step()
     alien = game.aliens.sprites()[0]
     alien.rect.center = game.ship.rect.center
     alien.x = float(alien.rect.x)
     game.step()
 
 
-def test_a_crash_costs_one_ship_and_brings_a_new_fleet(game, no_pause):
+def test_a_crash_costs_one_ship_and_brings_a_new_fleet(game):
     game.start()
 
     crash_an_alien_into_the_ship(game)
@@ -174,7 +172,7 @@ def test_a_crash_costs_one_ship_and_brings_a_new_fleet(game, no_pause):
     assert game.game_active
 
 
-def test_the_game_ends_after_three_crashes(game, no_pause):
+def test_the_game_ends_after_three_crashes(game):
     game.start()
 
     for _ in range(3):
@@ -183,7 +181,7 @@ def test_the_game_ends_after_three_crashes(game, no_pause):
     assert not game.game_active
 
 
-def test_no_reserve_icons_while_flying_the_last_ship(game, no_pause):
+def test_no_reserve_icons_while_flying_the_last_ship(game):
     game.start()
 
     for _ in range(2):
@@ -192,6 +190,49 @@ def test_no_reserve_icons_while_flying_the_last_ship(game, no_pause):
     assert game.game_active
     assert game.stats.ships_left == 1
     assert len(game.sb.ships) == 0
+
+
+# --- the pause after a crash -------------------------------------------------
+
+
+def frozen_state(game):
+    return alien_positions(game), game.ship.rect.x
+
+
+def test_a_crash_does_not_block_the_game_loop(game):
+    game.start()
+
+    started = time.perf_counter()
+    crash_an_alien_into_the_ship(game)
+    elapsed = time.perf_counter() - started
+
+    assert elapsed < 0.1
+
+
+def test_nothing_moves_during_the_pause_then_play_resumes(game):
+    game.start()
+    crash_an_alien_into_the_ship(game)
+    press(game, pygame.K_RIGHT)
+    after_crash = frozen_state(game)
+
+    for _ in range(30):  # half a second at 60 frames per second
+        game.step()
+    after_pause = frozen_state(game)
+    game.step()
+
+    assert after_pause == after_crash
+    assert frozen_state(game) != after_crash
+
+
+def test_a_new_game_does_not_start_paused(game):
+    game.start()
+    crash_an_alien_into_the_ship(game)
+    before = alien_positions(game)
+
+    game.start()
+    game.step()
+
+    assert alien_positions(game) != before
 
 
 # --- quitting ----------------------------------------------------------------
