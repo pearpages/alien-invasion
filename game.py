@@ -255,6 +255,8 @@ class Game:
             self.config.screen_height,
             alien_width,
             alien_height,
+            # Start the fleet just below the scoreboard, not behind it.
+            top=self.sb.bottom + self.config.fleet_gap,
         ):
             # Every alien shares the one image loaded at start-up.
             self.aliens.add(Alien(alien_image, x, y))

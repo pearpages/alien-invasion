@@ -43,11 +43,27 @@ def alien_positions(game):
 # --- starting ----------------------------------------------------------------
 
 
+FULL_FLEET = 63  # 9 columns x 7 rows, below the scoreboard
+
+
 def test_new_game_waits_for_play_with_a_full_fleet(game):
     assert not game.game_active
     assert game.running
-    assert len(game.aliens) == 72
+    assert len(game.aliens) == FULL_FLEET
     assert game.ship.rect.midbottom == (600, 800)
+
+
+def test_the_fleet_starts_below_the_scoreboard(game):
+    assert min(alien.rect.top for alien in game.aliens) > game.sb.bottom
+
+
+def test_a_new_level_starts_below_the_scoreboard_too(game):
+    game.start()
+    game.aliens.empty()
+
+    game.step()
+
+    assert min(alien.rect.top for alien in game.aliens) > game.sb.bottom
 
 
 def test_clicking_play_starts_the_game(game):
@@ -121,7 +137,7 @@ def test_shooting_an_alien_scores_its_points(game):
             break
 
     assert game.stats.score == 50
-    assert len(game.aliens) == 71
+    assert len(game.aliens) == FULL_FLEET - 1
 
 
 # --- the fleet ---------------------------------------------------------------
@@ -145,7 +161,7 @@ def test_clearing_the_fleet_goes_up_a_level(game):
     game.step()
 
     assert game.stats.level == 2
-    assert len(game.aliens) == 72
+    assert len(game.aliens) == FULL_FLEET
     assert game.difficulty.alien_points == 75
 
 
@@ -168,7 +184,7 @@ def test_a_crash_costs_one_ship_and_brings_a_new_fleet(game):
     crash_an_alien_into_the_ship(game)
 
     assert game.stats.ships_left == 2
-    assert len(game.aliens) == 72
+    assert len(game.aliens) == FULL_FLEET
     assert game.game_active
 
 

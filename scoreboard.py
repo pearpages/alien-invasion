@@ -8,6 +8,21 @@ from rules import format_score, reserve_ships
 from ship import Ship
 
 
+def score_label(score: int) -> str:
+    """Return the text shown for the current score."""
+    return f"Score: {format_score(score)}"
+
+
+def high_score_label(high_score: int) -> str:
+    """Return the text shown for the high score."""
+    return f"High score: {format_score(high_score)}"
+
+
+def level_label(level: int) -> str:
+    """Return the text shown for the current level."""
+    return f"Level: {level}"
+
+
 class Scoreboard:
     """A class to report scoring information."""
 
@@ -43,9 +58,8 @@ class Scoreboard:
 
     def prep_score(self):
         """Turn the score into a rendered image."""
-        score_str = format_score(self.stats.score)
         self.score_image = self.font.render(
-            score_str, True, self.text_color, self.bg_color
+            score_label(self.stats.score), True, self.text_color, self.bg_color
         )
 
         # Display the score at the top right of the screen.
@@ -55,9 +69,11 @@ class Scoreboard:
 
     def prep_high_score(self):
         """Turn the high score into a rendered image."""
-        high_score_str = format_score(self.stats.high_score)
         self.high_score_image = self.font.render(
-            high_score_str, True, self.text_color, self.bg_color
+            high_score_label(self.stats.high_score),
+            True,
+            self.text_color,
+            self.bg_color,
         )
 
         # Center the high score at the top of the screen.
@@ -67,9 +83,8 @@ class Scoreboard:
 
     def prep_level(self):
         """Turn the level into a rendered image."""
-        level_str = str(self.stats.level)
         self.level_image = self.font.render(
-            level_str, True, self.text_color, self.bg_color
+            level_label(self.stats.level), True, self.text_color, self.bg_color
         )
 
         # Position the level below the score.
@@ -85,6 +100,17 @@ class Scoreboard:
             ship.rect.x = 10 + ship_number * ship.rect.width
             ship.rect.y = 10
             self.ships.add(ship)
+
+    @property
+    def bottom(self) -> int:
+        """Return the y just below everything the scoreboard draws."""
+        rects = [
+            self.score_rect,
+            self.high_score_rect,
+            self.level_rect,
+            *(ship.rect for ship in self.ships),
+        ]
+        return max(rect.bottom for rect in rects)
 
     def check_high_score(self):
         """Check to see if there's a new high score."""

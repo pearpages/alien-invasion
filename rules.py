@@ -7,19 +7,26 @@ from collections.abc import Iterable
 
 
 def fleet_positions(
-    screen_width: int, screen_height: int, alien_width: int, alien_height: int
+    screen_width: int,
+    screen_height: int,
+    alien_width: int,
+    alien_height: int,
+    top: int | None = None,
 ) -> list[tuple[int, int]]:
     """Return the top-left (x, y) of every alien in a new fleet.
 
     Aliens are one alien width apart and one alien height apart. The
-    fleet leaves a margin of one alien on the left, and keeps clear of
-    the right edge and of the bottom of the screen, where the ship is.
+    first row starts at top, one alien height down by default. The
+    fleet leaves a margin of one alien on the left, keeps clear of the
+    right edge, and its lowest row always ends at least four alien
+    heights above the bottom of the screen, where the ship is.
     """
+    if top is None:
+        top = alien_height
+    lowest_row_top = screen_height - 5 * alien_height
     return [
         (x, y)
-        for y in range(
-            alien_height, screen_height - 3 * alien_height, 2 * alien_height
-        )
+        for y in range(top, lowest_row_top + 1, 2 * alien_height)
         for x in range(
             alien_width, screen_width - 2 * alien_width, 2 * alien_width
         )

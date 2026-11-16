@@ -26,6 +26,7 @@ class Config:
     bullet_speed: float = 2.5
 
     # Aliens
+    fleet_gap: int = 10  # space between the scoreboard and the fleet
     alien_speed: float = 1.0
     alien_points: int = 50
     fleet_drop_speed: int = 10

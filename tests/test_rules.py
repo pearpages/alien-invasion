@@ -42,6 +42,26 @@ def test_no_fleet_when_the_screen_is_too_small():
     assert fleet_positions(150, 800, alien_width=60, alien_height=40) == []
 
 
+def test_fleet_can_start_lower_down():
+    positions = fleet_positions(
+        1200, 800, alien_width=60, alien_height=40, top=106
+    )
+
+    assert positions[0] == (60, 106)
+    assert min(y for _, y in positions) == 106
+
+
+def test_starting_lower_never_brings_the_fleet_closer_to_the_ship():
+    default = fleet_positions(1200, 800, alien_width=60, alien_height=40)
+    lower = fleet_positions(
+        1200, 800, alien_width=60, alien_height=40, top=106
+    )
+
+    lowest_bottom = max(y for _, y in lower) + 40
+    assert lowest_bottom <= max(y for _, y in default) + 40
+    assert len({y for _, y in lower}) == 7  # one row fewer fits
+
+
 # --- at_screen_edge ----------------------------------------------------------
 
 
