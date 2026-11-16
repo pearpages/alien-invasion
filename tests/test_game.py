@@ -235,6 +235,24 @@ def test_a_new_game_does_not_start_paused(game):
     assert alien_positions(game) != before
 
 
+# --- the high score ----------------------------------------------------------
+
+
+def test_a_game_can_start_from_a_saved_high_score():
+    game = Game(Config(), Assets.load(), high_score=900)
+
+    assert game.stats.high_score == 900
+
+
+def test_a_new_game_keeps_the_saved_high_score():
+    game = Game(Config(), Assets.load(), high_score=900)
+
+    game.start()
+
+    assert game.stats.high_score == 900
+    assert game.stats.score == 0
+
+
 # --- quitting ----------------------------------------------------------------
 
 

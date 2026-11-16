@@ -23,6 +23,8 @@ uv run main.py
 
 Controls: click **Play**, use ← → to move, Space to fire, Q to quit.
 
+The high score is saved to `high_score.json` next to the code when you quit, and loaded the next time you play. Delete the file to reset it. It isn't committed to git.
+
 ## Checks
 
 ```bash
@@ -35,7 +37,7 @@ ruff and pytest are dev dependencies, configured in `pyproject.toml`.
 
 ## Design
 
-Every class receives what it needs through its constructor instead of reaching into the whole game. `main()` in `main.py` is the one place that creates the window, loads the images and connects everything. No class keeps the screen: anything that draws gets it as an argument, `draw(screen)`. So every piece, including the whole game on an off-screen surface, can be tested without a window.
+Every class receives what it needs through its constructor instead of reaching into the whole game. `main()` in `main.py` is the one place that creates the window, touches files (images and the high score) and connects everything. No class keeps the screen: anything that draws gets it as an argument, `draw(screen)`. So every piece, including the whole game on an off-screen surface, can be tested without a window.
 
 Each frame of the game loop does three separate jobs: `handle(event)` turns input into what the player wants, `step()` moves the world forward one frame, and `draw(screen)` paints it. Only `Game.run()` touches the real window, clock and mouse cursor, so tests drive the whole game with made-up events.
 
@@ -45,6 +47,7 @@ Each frame of the game loop does three separate jobs: `handle(event)` turns inpu
 |---|---|
 | `main.py` | Entry point: `main()` starts pygame, opens the window, loads assets and connects everything |
 | `game.py` | `Game`: `handle(event)` for input, `step()` for one frame of logic, `draw(screen)` for output, and `run(screen)`, the loop that connects them to the real window |
+| `high_score.py` | `load_high_score` / `save_high_score`: keep the high score in `high_score.json`; a missing or damaged file counts as 0 |
 | `assets.py` | `Assets`: loads each image once, from `images/` next to the code |
 | `rules.py` | The game's rules as plain functions with no pygame: fleet layout, edges, scoring, firing, ship movement |
 | `config.py` | `Config`: frozen dataclass of settings that never change |

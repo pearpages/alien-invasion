@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# Player data, not code
+high_score.json
+high_score.json.tmp

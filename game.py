@@ -25,8 +25,11 @@ class Game:
     can drive a game with made-up events and no window.
     """
 
-    def __init__(self, config: Config, assets: Assets):
-        """Set up a game waiting for the player to click Play."""
+    def __init__(self, config: Config, assets: Assets, high_score: int = 0):
+        """Set up a game waiting for the player to click Play.
+
+        high_score is the best score from earlier games, if any.
+        """
         self.config = config
         self.assets = assets
         self.difficulty = Difficulty.starting(config)
@@ -34,7 +37,9 @@ class Game:
 
         # Create an instance to store game statistics,
         #   and create a scoreboard.
-        self.stats = GameStats(ships_left=config.ship_limit)
+        self.stats = GameStats(
+            ships_left=config.ship_limit, high_score=high_score
+        )
         self.sb = Scoreboard(self.stats, config.bg_color, assets.ship, bounds)
 
         # 1 moves the fleet right; -1 moves it left.
