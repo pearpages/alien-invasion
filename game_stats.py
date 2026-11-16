@@ -1,16 +1,18 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class GameStats:
     """Track statistics for Alien Invasion."""
 
-    def __init__(self, ai_game):
-        """Initialize statistics."""
-        self.settings = ai_game.settings
-        self.reset_stats()
+    ships_left: int
+    score: int = 0
+    level: int = 1
+    # High score should never be reset.
+    high_score: int = 0
 
-        # High score should never be reset.
-        self.high_score = 0
-
-    def reset_stats(self):
-        """Initialize statistics that can change during the game."""
-        self.ships_left = self.settings.ship_limit
+    def reset(self, ship_limit: int) -> None:
+        """Start a new game, keeping the high score."""
+        self.ships_left = ship_limit
         self.score = 0
         self.level = 1

@@ -40,9 +40,10 @@ ruff and pytest are dev dependencies, configured in `pyproject.toml`.
 | File | Role |
 |---|---|
 | `alien_invasion.py` | Main game class and loop |
-| `settings.py` | All settings, including the speed-up per level |
+| `config.py` | `Config`: frozen dataclass of settings that never change |
+| `difficulty.py` | `Difficulty`: speeds and alien points for the current level; each level-up makes a new one |
 | `ship.py`, `alien.py`, `bullet.py` | The sprites |
-| `game_stats.py` | Score, level, ships left |
+| `game_stats.py` | `GameStats`: dataclass for score, level, ships left, high score |
 | `scoreboard.py` | Draws score, high score, level, remaining ships |
 | `button.py` | The Play button |
 | `pyproject.toml` | Project info and dependencies (like `package.json`) |

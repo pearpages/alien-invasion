@@ -12,7 +12,7 @@ class Scoreboard:
         self.ai_game = ai_game
         self.screen = ai_game.screen
         self.screen_rect = self.screen.get_rect()
-        self.settings = ai_game.settings
+        self.config = ai_game.config
         self.stats = ai_game.stats
 
         # Font settings for scoring information.
@@ -34,7 +34,7 @@ class Scoreboard:
         rounded_score = round(self.stats.score, -1)
         score_str = f"{rounded_score:,}"
         self.score_image = self.font.render(
-            score_str, True, self.text_color, self.settings.bg_color
+            score_str, True, self.text_color, self.config.bg_color
         )
 
         # Display the score at the top right of the screen.
@@ -47,7 +47,7 @@ class Scoreboard:
         high_score = round(self.stats.high_score, -1)
         high_score_str = f"{high_score:,}"
         self.high_score_image = self.font.render(
-            high_score_str, True, self.text_color, self.settings.bg_color
+            high_score_str, True, self.text_color, self.config.bg_color
         )
 
         # Center the high score at the top of the screen.
@@ -59,7 +59,7 @@ class Scoreboard:
         """Turn the level into a rendered image."""
         level_str = str(self.stats.level)
         self.level_image = self.font.render(
-            level_str, True, self.text_color, self.settings.bg_color
+            level_str, True, self.text_color, self.config.bg_color
         )
 
         # Position the level below the score.

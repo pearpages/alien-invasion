@@ -9,7 +9,6 @@ class Ship(Sprite):
         """Initialize the ship and set its starting position."""
         super().__init__()
         self.screen = ai_game.screen
-        self.settings = ai_game.settings
         self.screen_rect = ai_game.screen.get_rect()
 
         # Load the ship image and get its rect.
@@ -26,13 +25,13 @@ class Ship(Sprite):
         self.moving_right = False
         self.moving_left = False
 
-    def update(self):
-        """Update the ship's position based on movement flags."""
+    def update(self, speed: float):
+        """Move the ship speed pixels, following the movement flags."""
         # Update the ship's x value, not the rect.
         if self.moving_right and self.rect.right < self.screen_rect.right:
-            self.x += self.settings.ship_speed
+            self.x += speed
         if self.moving_left and self.rect.left > 0:
-            self.x -= self.settings.ship_speed
+            self.x -= speed
 
         # Update rect object from self.x.
         self.rect.x = self.x
